@@ -37,9 +37,13 @@ footer {
     text-align: center; 
 }
 </style> 
+
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 <script src="libs/request.min.js" ></script>
 <script src="webrtcstreamer.js" ></script>
+
 <script>
+	var endpoint = "http://babycam.local:8000";
 	// ------------------------------------------
 	// WebRTC connections
 	// ------------------------------------------	
@@ -123,7 +127,7 @@ footer {
 		if (webrtcServer) {
 			webrtcServer.disconnect();		
 			webRtcServerList[videoTag] = undefined;
-		}
+		}r
 		
 		// remove the video element and its tile
 		var divElt = 	document.getElementById ("div_" + videoTag);
@@ -150,13 +154,17 @@ footer {
 			divelt.appendChild(nameelt);
 			var videoelt = document.createElement("video");
 			videoelt.id = videoTag;
+			
+			//videoelt.setAttribute("muted",true);
+			videoelt.setAttribute("playsinline",true);
+
 			divelt.appendChild(videoelt);
 			document.getElementById("content").appendChild(divelt);
 		}
 		var videoelt = 	document.getElementById (videoTag);
 		
 		// connect video element to webrtc stream
-		var webRtcServer = new WebRtcStreamer(videoTag, null, request);
+		var webRtcServer = new WebRtcStreamer(videoTag, "http://babycam.local:8000", request);
 		webRtcServer.connect(url.video, url.audio, argoptions);
 			
 		// highlight the navigation 
@@ -171,8 +179,8 @@ footer {
 	// load/unload callbacks
 	// ------------------------------------------	
 	window.onload         = function() { 
-		sendRequest(request, "/getMediaList", null, null, onGetDeviceList); 
-		sendRequest(request,"/version", null, null, onVersion); 
+		sendRequest(request, endpoint + "/getMediaList", null, null, onGetDeviceList); 
+		sendRequest(request, endpoint + "/version", null, null, onVersion); 
 	} 
 	window.onbeforeunload = function() { 
 		for (var url in webRtcServerList) { 

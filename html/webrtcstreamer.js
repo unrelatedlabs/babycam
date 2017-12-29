@@ -116,6 +116,17 @@ WebRtcStreamer.prototype.onReceiveGetIceServers = function(iceServers, videourl,
 			this.pc.addStream(stream);
 		}
 		
+		// var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+		// if( isSafari ){ 
+		// 	this.pc.addTransceiver('video')
+		// 	this.pc.addTransceiver('audio')
+		// }
+
+		if( this.pc.addTransceiver ){
+			this.pc.addTransceiver('video')
+			this.pc.addTransceiver('audio')
+		}
+
 		// create Offer
 		this.pc.createOffer(function(sessionDescription) {
 			console.log("Create offer:" + JSON.stringify(sessionDescription));
