@@ -1,6 +1,6 @@
 FROM ubuntu:xenial
 
-ENV  GNARGSCOMMON 'rtc_include_tests=false rtc_enable_protobuf=false use_custom_libcxx=false use_ozone=true rtc_include_pulse_audio=false rtc_build_examples=false' 
+ENV  GNARGSCOMMON 'rtc_include_tests=false rtc_enable_protobuf=false use_custom_libcxx=false use_ozone=true rtc_include_pulse_audio=false' 
 
 # armv7
 
@@ -49,9 +49,7 @@ RUN mkdir /webrtc && \
     fetch --nohooks webrtc 
 
 RUN cd /webrtc/src/ && git checkout branch-heads/62 
-#&& \
- #   cd .. && sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" src/DEPS 
-
+    #sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" DEPS
 
 RUN cd /webrtc && gclient sync -r src@branch-heads/62
 
@@ -69,6 +67,7 @@ RUN make WEBRTCROOT=/webrtc live555 alsa-lib
 RUN apt-get install -y vim 
 
 
+# COPY . /build
 
 # RUN cd /webrtc/src && git checkout -- DEPS && git checkout branch-heads/62
 # #RUN cd /webrtc/src && git log 
@@ -77,7 +76,7 @@ RUN apt-get install -y vim
 
 # RUN git clone https://github.com/unrelatedlabs/webrtc-clone /webrtc-clone && \
 #     cd /webrtc-clone && git checkout 5d2bb36b95c2a89c4bdddb1ed613f9bcf8aa764e
-    
+
 
 # # build WebRTC
 # - pushd webrtc
@@ -87,27 +86,26 @@ RUN apt-get install -y vim
 # - popd
 # - popd
 
-RUN cd /webrtc/src/ && git checkout 0f1c15d
+#RUN cd /webrtc/src/ && git checkout 0f1c15d
 
-RUN cd /webrtc && gclient sync -r src@0f1c15d
+#RUN cd /webrtc && gclient sync -r src@0f1c15d
 
 
 #RUN cd /webrtc && gclient sync
 
-COPY patches/audio_mixer_impl.cc  /webrtc/src/modules/audio_mixer/audio_mixer_impl.cc
+#COPY patches/audio_mixer_impl.cc  /webrtc/src/modules/audio_mixer/audio_mixer_impl.cc
 
 RUN cd /webrtc/src && \
+    sed -i -e 's|"examples",||' BUILD.gn  && \
     gn gen ${GYP_GENERATOR_OUTPUT}/out/Release --args="${GNARGSCOMMON} ${GNARGS}" && \
     ninja -C ${GYP_GENERATOR_OUTPUT}/out/Release jsoncpp rtc_json webrtc 
 
 #     cd .. && sed -i -e "s|'src/resources'],|'src/resources'],'condition':'rtc_include_tests==true',|" src/DEPS && \
 
-COPY . /build
 
 # # build
 # - make WEBRTCROOT=./webrtc all tgz
-RUN make WEBRTCROOT=/webrtc all tgz
+# RUN make WEBRTCROOT=/webrtc all tgz
 
 # # clean up
 # - rm -rf webrtc rpi_tools depot_tools
-CMD ["make","WEBRTCROOT=/webrtc","all","tgz"]
