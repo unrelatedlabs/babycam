@@ -24,6 +24,9 @@
 #include "rtspvideocapturer.h"
 #endif
 
+#include "VideoProcessor.h"
+
+
 const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
 
@@ -36,11 +39,14 @@ const char kCandidateSdpName[] = "candidate";
 const char kSessionDescriptionTypeName[] = "type";
 const char kSessionDescriptionSdpName[] = "sdp";
 
+VideoProcessor videoProcessor;
+//
+
 /* ---------------------------------------------------------------------------
 **  Constructor
 ** -------------------------------------------------------------------------*/
 PeerConnectionManager::PeerConnectionManager(const std::string & stunurl, const std::string & turnurl, const std::map<std::string,std::string> & urlList, const webrtc::AudioDeviceModule::AudioLayer audioLayer)
-	: audioDeviceModule_(webrtc::AudioDeviceModule::Create(0, audioLayer))
+	: audioDeviceModule_(webrtc::AudioDeviceModule::Create( audioLayer))
 	, audioDecoderfactory_(webrtc::CreateBuiltinAudioDecoderFactory())
 	, peer_connection_factory_(webrtc::CreatePeerConnectionFactory(NULL,
                                                                     rtc::Thread::Current(),
@@ -558,6 +564,7 @@ const Json::Value PeerConnectionManager::hangUp(const std::string &peerid)
 			std::string streamLabel = localstreams->at(i)->label();
 
 			bool stillUsed = this->streamStillUsed(streamLabel);
+			stillUsed = true; //This is so the video processor can work
 			if (!stillUsed)
 			{
 				RTC_LOG(LS_ERROR) << "Close PeerConnection no more used " << streamLabel;
@@ -756,6 +763,7 @@ rtc::scoped_refptr<webrtc::VideoTrackInterface> PeerConnectionManager::CreateVid
 			int num_devices = info->NumberOfDevices();
 			for (int i = 0; i < num_devices; ++i)
 			{
+				RTC_LOG(INFO) << "Devices:" << num_devices << " device:" << i;
 				const uint32_t kSize = 256;
 				char name[kSize] = {0};
 				char id[kSize] = {0};
@@ -781,6 +789,11 @@ rtc::scoped_refptr<webrtc::VideoTrackInterface> PeerConnectionManager::CreateVid
 	{
 		rtc::scoped_refptr<webrtc::VideoTrackSourceInterface> videoSource = peer_connection_factory_->CreateVideoSource(std::move(capturer), NULL);
 		video_track = peer_connection_factory_->CreateVideoTrack(kVideoLabel, videoSource);
+		
+		//HERE: video track created
+		RTC_LOG(INFO) << "Video Track Created:";
+		//
+		video_track->AddOrUpdateSink(&videoProcessor, rtc::VideoSinkWants());
 	}
 	return video_track;
 }
@@ -806,10 +819,13 @@ rtc::scoped_refptr<webrtc::AudioTrackInterface> PeerConnectionManager::CreateAud
 		int16_t idx_audioDevice = -1;
 		for (int i = 0; i < num_audioDevices; ++i)
 		{
+
 			char name[webrtc::kAdmMaxDeviceNameSize] = {0};
 			char id[webrtc::kAdmMaxGuidSize] = {0};
 			if (audioDeviceModule_->RecordingDeviceName(i, name, id) != -1)
 			{
+				RTC_LOG(INFO) << "audio name:" << name;
+
 				if (audiourl == name)
 				{
 					idx_audioDevice = i;
@@ -817,7 +833,7 @@ rtc::scoped_refptr<webrtc::AudioTrackInterface> PeerConnectionManager::CreateAud
 				}
 			}
 		}
-		RTC_LOG(LS_ERROR) << "audiourl:" << audiourl << " options:" << options << " idx_audioDevice:" << idx_audioDevice;
+		RTC_LOG(LS_ERROR)<< "num" << num_audioDevices << " audiourl:" << audiourl << " options:" << options << " idx_audioDevice:" << idx_audioDevice;
 		if ( (idx_audioDevice >= 0) && (idx_audioDevice < num_audioDevices) )
 		{
 			audioDeviceModule_->SetRecordingDevice(idx_audioDevice);
@@ -846,6 +862,14 @@ bool PeerConnectionManager::AddStreams(webrtc::PeerConnectionInterface* peer_con
 	if (audioit != urlList_.end()) {
 		audio = audioit->second;
 	}
+	if( audio.length() == 0 ){
+		audio = "default";
+	}
+
+	for(auto &url : urlList_ ){
+		RTC_LOG(INFO) << "urlList_" << url.first << " => " << url.second;
+	}
+
 		
 	// compute stream label removing space because SDP use label
 	std::string streamLabel = video;
@@ -901,7 +925,7 @@ bool PeerConnectionManager::AddStreams(webrtc::PeerConnectionInterface* peer_con
 		}
 		else
 		{
-			RTC_LOG(INFO) << "stream added to PeerConnection";
+			RTC_LOG(INFO) << "stream added to PeerConnection " << videourl <<  " " << audiourl << " " << options ;
 			ret = true;
 		}
 	}

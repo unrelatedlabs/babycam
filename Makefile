@@ -90,11 +90,21 @@ h264bitstream/.libs/libh264bitstream.a: h264bitstream/Makefile
 CFLAGS += -I h264bitstream
 LDFLAGS += h264bitstream/.libs/libh264bitstream.a
 
-src/%.o: src/%.cpp $(LIBS)
-	$(CXX) -o $@ -c $< $(CFLAGS) -DVERSION="\"$(VERSION)\""
 
 FILES = $(wildcard src/*.cpp)
-$(TARGET): $(subst .cpp,.o,$(FILES)) $(LIBS) 
+HEADERS = $(wildcard inc/*.h)
+OBJ = $(subst .cpp,.o,$(FILES))
+DEP = $(OBJ:%.o=%.d)
+
+
+-include $(DEP)
+
+src/%.o: src/%.cpp $(LIBS)
+	$(CXX)  -MMD -o $@ -c $< $(CFLAGS) -DVERSION="\"$(VERSION)\""
+
+
+
+$(TARGET): $(OBJ) $(LIBS) 
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 clean:

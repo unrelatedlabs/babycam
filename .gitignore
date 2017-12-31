@@ -1,4 +1,12 @@
 src/*.o
 *.a
 *.tgz
-webrtc-streamer
+#webrtc-streamer
+*.d
+webrtc/
+
+*.bak
+
+test.raw
+
+test.mp4
