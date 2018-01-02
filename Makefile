@@ -11,7 +11,7 @@ PREFIX?=/usr
 GITVERSION=$(shell git describe --tags --always --dirty)
 VERSION=$(GITVERSION)
 
-TARGET = $(notdir $(CURDIR))
+TARGET = babycam
 all: $(TARGET)
 
 # webrtc
