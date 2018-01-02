@@ -43,7 +43,8 @@ footer {
 <script src="webrtcstreamer.js" ></script>
 
 <script>
-	var endpoint = "http://babycam.local:8000";
+	var endpoint = "";//"http://babycam.local:8000";
+
 	// ------------------------------------------
 	// WebRTC connections
 	// ------------------------------------------	
@@ -164,7 +165,7 @@ footer {
 		var videoelt = 	document.getElementById (videoTag);
 		
 		// connect video element to webrtc stream
-		var webRtcServer = new WebRtcStreamer(videoTag, "http://babycam.local:8000", request);
+		var webRtcServer = new WebRtcStreamer(videoTag, endpoint, request);
 		webRtcServer.connect(url.video, url.audio, argoptions);
 			
 		// highlight the navigation 

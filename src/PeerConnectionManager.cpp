@@ -793,7 +793,6 @@ rtc::scoped_refptr<webrtc::VideoTrackInterface> PeerConnectionManager::CreateVid
 		//HERE: video track created
 		RTC_LOG(INFO) << "Video Track Created:";
 		//
-		video_track->AddOrUpdateSink(&videoProcessor, rtc::VideoSinkWants());
 	}
 	return video_track;
 }
@@ -912,6 +911,10 @@ bool PeerConnectionManager::AddStreams(webrtc::PeerConnectionInterface* peer_con
 
 			RTC_LOG(INFO) << "Adding Stream to map";
 			stream_map_[streamLabel] = stream;
+
+			video_track->AddOrUpdateSink(&videoProcessor, rtc::VideoSinkWants());
+			audio_track->AddSink(&videoProcessor);
+
 		}
 	}
 

@@ -130,3 +130,10 @@ alsa-lib:
 	wget ftp://ftp.alsa-project.org/pub/lib/alsa-lib-$(ALSAVERSION).tar.bz2 -O - | tar xjf -
 	cd alsa-lib-$(ALSAVERSION) && CC=$(CC) ./configure --disable-python --disable-shared --enable-static --host=$(shell $(CC) -dumpmachine) --prefix=$(SYSROOT)$(PREFIX) && make && make install
 	rm -rf alsa-lib-$(ALSAVERSION)
+
+builder-docker:
+	docker build -t webrtc-streamer-builder .
+
+build-with-docker: 
+	docker run -v $(shell pwd)/:/build  webrtc-streamer-builder
+

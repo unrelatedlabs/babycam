@@ -1,3 +1,12 @@
+Baby Cam
+========
+
+This is a fork of the WebRTC-streamer for use as a Baby Cam.
+
+- Realtime video stream with WebRTC. Works in most modern web browsers
+- Temperature and Humidity monitoring
+- Light monitoring
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c209c81a15854964a08df5c300f56804)](https://www.codacy.com/app/michelpromonet_2643/webrtc-streamer?utm_source=github.com&utm_medium=referral&utm_content=mpromonet/webrtc-streamer&utm_campaign=badger)
 [![Build status](https://travis-ci.org/mpromonet/webrtc-streamer.png)](https://travis-ci.org/mpromonet/webrtc-streamer)
 
